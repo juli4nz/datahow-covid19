@@ -1,10 +1,20 @@
 <template>
   <v-row>
-    <v-col>
-      <side-bar @update-country="updateCountry"></side-bar>
+    <v-col cols="12" sm="4" md="4">
+      <v-card elevation="4" :loading="false" tile class="rounded-lg pa-4">
+        <side-bar
+          @update-country="updateCountry"
+          :chart-data="chartData"
+        ></side-bar>
+      </v-card>
     </v-col>
-    <v-col>
-      <main-graph :country="country"></main-graph>
+    <v-col cols="12" sm="8" md="8">
+      <v-card elevation="4" :loading="false" tile class="rounded-lg pa-4">
+        <main-graph
+          @update-chart-data="updateChartData"
+          :country="country"
+        ></main-graph>
+      </v-card>
     </v-col>
   </v-row>
 </template>
@@ -21,11 +31,15 @@ export default {
   data: () => {
     return {
       country: '',
+      chartData: null,
     };
   },
   methods: {
     updateCountry(country) {
       this.country = country;
+    },
+    updateChartData(data) {
+      this.chartData = data;
     },
   },
 };

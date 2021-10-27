@@ -1,72 +1,77 @@
 <template>
-  <v-card elevation="4" :loading="false" tile>
-    <v-container>
-      <v-row>
-        <v-col>
-          <v-autocomplete
-            v-model="selectedCountry"
-            :items="countriesList"
-            label="Select a country to display data"
-            item-text="name"
-            item-value="iso"
-          ></v-autocomplete>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col>
-          <form @submit.prevent="movingAverage">
-            <v-menu
-              v-model="maDates.menuFrom"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="maDates.from"
-                  label="From date:"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
+  <v-container>
+    <v-row>
+      <v-col>
+        <v-autocomplete
+          v-model="selectedCountry"
+          :items="countriesList"
+          label="Select a country to display data"
+          item-text="name"
+          item-value="iso"
+        ></v-autocomplete>
+        <v-divider></v-divider>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <form @submit.prevent="movingAverage">
+          <v-menu
+            v-model="maDates.menuFrom"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
                 v-model="maDates.from"
-                @input="maDates.menuFrom = false"
-              ></v-date-picker>
-            </v-menu>
-            <v-menu
-              v-model="maDates.menuTo"
-              :close-on-content-click="false"
-              :nudge-right="40"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="maDates.to"
-                  label="To date:"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
+                label="From date:"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="maDates.from"
+              @input="maDates.menuFrom = false"
+            ></v-date-picker>
+          </v-menu>
+          <v-menu
+            v-model="maDates.menuTo"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            transition="scale-transition"
+            offset-y
+            min-width="auto"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
                 v-model="maDates.to"
-                @input="maDates.menuTo = false"
-              ></v-date-picker>
-            </v-menu>
-            <v-btn color="primary" type="submit" elevation="1">Submit</v-btn>
-          </form>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-card>
+                label="To date:"
+                prepend-icon="mdi-calendar"
+                readonly
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="maDates.to"
+              @input="maDates.menuTo = false"
+            ></v-date-picker>
+          </v-menu>
+          <v-btn color="primary" type="submit" elevation="1">Submit</v-btn>
+        </form>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-banner>Moving Average</v-banner>
+        <v-chip label outlined class="mt-2">{{ movingAverageValue }}</v-chip>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 <script>
 import axios from 'axios';
@@ -74,10 +79,16 @@ import moment from 'moment';
 
 export default {
   name: 'SideBar',
-  props: {},
+  props: {
+    chartData: {
+      type: Array,
+      default() {
+        return [];
+      },
+    },
+  },
   components: {},
   data: () => ({
-    daysInterval: [],
     countriesList: [],
     selectedCountry: '',
     movingAverageValue: 0,
@@ -91,7 +102,6 @@ export default {
   watch: {
     selectedCountry(newCountry) {
       this.$emit('update-country', newCountry);
-      //this.fetchData(newCountry);
     },
   },
   methods: {
@@ -117,28 +127,21 @@ export default {
       const to = moment(this.maDates.to);
       const interval = to.diff(from, 'days');
 
-      const totalCases = this.chart.data.reduce((prev, curr, index) => {
+      const totalCases = this.chartData.reduce((prev, curr) => {
         if (
-          moment(this.daysInterval[index]).isSameOrAfter(from) ||
-          moment(this.daysInterval[index]).isSameOrBefore(to)
+          moment(curr.label).isSameOrAfter(from) ||
+          moment(curr.label).isSameOrBefore(to)
         ) {
-          return curr + prev;
+          console.log(curr.value + prev.value);
+          return curr.value + prev.value;
         }
       });
-      this.movingAverageValue = (totalCases / interval).toFixed(2);
-    },
-    getDaysIntervalArray(days) {
-      const end = moment().toDate();
-      let start = moment().subtract(days, 'days').toDate();
-      while (start < end) {
-        this.daysInterval.push(moment(start).format('YYYY-MM-DD'));
-        start = moment(start).add(1, 'days').toDate();
-      }
+      console.log(totalCases);
+      this.movingAverageValue = Math.floor(totalCases / interval).toFixed(2);
     },
   },
   created() {
     this.init();
-    this.getDaysIntervalArray(10);
   },
 };
 </script>
