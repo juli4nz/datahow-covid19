@@ -2,6 +2,16 @@
   <v-container>
     <v-row>
       <v-col>
+        <v-img
+          lazy-src="@/assets/images/logo.png"
+          max-height="150"
+          max-width="250"
+          src="@/assets/images/logo.png"
+        ></v-img>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
         <v-autocomplete
           v-model="selectedCountry"
           :items="countriesList"
@@ -132,12 +142,10 @@ export default {
           moment(curr.label).isSameOrAfter(from) ||
           moment(curr.label).isSameOrBefore(to)
         ) {
-          console.log(curr.value + prev.value);
           return curr.value + prev.value;
         }
       });
-      console.log(totalCases);
-      this.movingAverageValue = Math.floor(totalCases / interval).toFixed(2);
+      this.movingAverageValue = Math.floor(totalCases / interval);
     },
   },
   created() {
