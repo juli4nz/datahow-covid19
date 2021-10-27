@@ -1,60 +1,26 @@
 <template>
-  <v-container>
-    <v-autocomplete
-      v-model="selectedCountry"
-      :items="countriesList"
-      label="Select a country to display data"
-      item-text="name"
-      item-value="iso"
-    ></v-autocomplete>
-    <line-chart
-      v-if="chart.loaded"
-      :chart-options="chart.options"
-      :chart-data="chart.data"
-      :chart-labels="chart.labels"
-      :chart-title="chart.title"
-    >
-    </line-chart>
-    <v-progress-circular
-      v-else
-      :size="50"
-      color="primary"
-      indeterminate
-    ></v-progress-circular>
-    <form @submit.prevent="movingAverage">
-      <v-text-field
-        label="From date:"
-        type="date"
-        v-model="maDates.from"
-      ></v-text-field>
-      <v-menu
-        v-model="menu2"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        transition="scale-transition"
-        offset-y
-        min-width="auto"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <v-text-field
-            v-model="maDates.from"
-            label="From date:"
-            prepend-icon="mdi-calendar"
-            readonly
-            v-bind="attrs"
-            v-on="on"
-          ></v-text-field>
-        </template>
-        <v-date-picker v-model="date" @input="menu2 = false"></v-date-picker>
-      </v-menu>
-      <v-text-field
-        label="To date:"
-        type="date"
-        v-model="maDates.to"
-      ></v-text-field>
-      <v-btn color="primary" type="submit" elevation="1">Submit</v-btn>
-    </form>
-  </v-container>
+  <v-card elevation="4" :loading="false" tile>
+    <v-container>
+      <v-row>
+        <v-col>
+          <line-chart
+            v-if="chart.loaded"
+            :chart-options="chart.options"
+            :chart-data="chart.data"
+            :chart-labels="chart.labels"
+            :chart-title="chart.title"
+          >
+          </line-chart>
+          <v-progress-circular
+            v-else
+            :size="50"
+            color="primary"
+            indeterminate
+          ></v-progress-circular>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-card>
 </template>
 <script>
 import axios from 'axios';
@@ -66,10 +32,14 @@ export default {
   components: {
     LineChart,
   },
+  props: {
+    country: {
+      type: String,
+      default: '',
+    },
+  },
   data: () => ({
     daysInterval: [],
-    countriesList: [],
-    selectedCountry: '',
     movingAverageValue: 0,
     chart: {
       data: [],
@@ -78,33 +48,19 @@ export default {
       loaded: true,
     },
     maDates: {
+      menuFrom: false,
+      menuTo: false,
       from: '',
       to: '',
     },
   }),
   watch: {
-    selectedCountry(newCountry) {
+    country(newCountry) {
       this.fetchData(newCountry);
     },
   },
   methods: {
-    async init() {
-      try {
-        const { data } = await axios.get('http://localhost:8080/regions', {
-          params: {
-            order: 'name',
-            sort: 'asc',
-          },
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json',
-          },
-        });
-        this.countriesList = data.data;
-      } catch (e) {
-        console.error(e);
-      }
-    },
+    init() {},
     async fetchData(country) {
       this.chart.loaded = false;
       let promises = [];
