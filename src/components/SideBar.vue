@@ -3,6 +3,7 @@
     <v-row>
       <v-col>
         <v-img
+          data-test="logo"
           lazy-src="@/assets/images/logo.png"
           max-height="150"
           max-width="250"
@@ -13,6 +14,7 @@
     <v-row>
       <v-col>
         <v-autocomplete
+          data-test="autocomplete"
           v-model="selectedCountry"
           :items="countriesList"
           label="Select a country to display data"
