@@ -1,31 +1,38 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 
 import SideBar from '@/components/SideBar.vue';
 import Vuetify from 'vuetify';
 
 describe('SideBar.vue', () => {
-  const localVue = createLocalVue();
-  let vuetify;
+  let wrapper, localVue, vuetify;
 
   beforeEach(() => {
+    localVue = createLocalVue();
     vuetify = new Vuetify();
+    wrapper = shallowMount(SideBar, {
+      localVue,
+      vuetify,
+      propsData: {
+        chartData: null,
+      },
+    });
+  });
+
+  afterEach(() => {
+    wrapper.destroy();
+  });
+
+  it('should render a vue instance', () => {
+    expect(wrapper.exists()).toBe(true);
   });
 
   it('should have a logo image', () => {
-    const wrapper = mount(SideBar, {
-      localVue,
-      vuetify,
-    });
     const logo = wrapper.find('[data-test="logo"]');
-    expect(logo.props('src')).toEqual('@/assets/images/logo.png');
+    expect(logo.props('src')).toMatch('@/assets/images/logo.png');
   });
 
-  it('should have autocomplete', () => {
-    const wrapper = mount(SideBar, {
-      localVue,
-      vuetify,
-    });
-
-    const autocomplete = wrapper.find('[data-test="autocomplete"]');
+  it('should have two date inputs', () => {
+    const datesInputs = wrapper.findAll('[data-test="date"]');
+    expect(datesInputs.length).toEqual(2);
   });
 });
